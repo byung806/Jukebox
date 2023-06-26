@@ -189,7 +189,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Get updated display text
         var text = ""
         if (showTitle) { text += currentTrackTitle }
-        if (showArtist) { text += " • " + currentTrackArtist }
+        text = text.isEmpty ? text : text + " • "
+        if (showArtist) { text += currentTrackArtist }
         
         print("Text: " + text)
         
