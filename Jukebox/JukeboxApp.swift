@@ -13,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @AppStorage("viewedOnboarding") var viewedOnboarding: Bool = false
     @AppStorage("showTitle") private var showTitle: Bool = true
     @AppStorage("showArtist") private var showArtist: Bool = false
+    @AppStorage("statusBarButtonLimit") private var statusBarButtonLimit = 300.0
     @StateObject var contentViewVM = ContentViewModel()
     static private(set) var instance: AppDelegate! = nil
     private var statusBarItem: NSStatusItem!
@@ -20,10 +21,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var popover: NSPopover!
     private var preferencesWindow: PreferencesWindow!
     private var onboardingWindow: OnboardingWindow!
-    
-    public var currentTrackTitle: String = ""
-    public var currentTrackArtist: String = ""
-    public var currentIsPlaying: Bool = false
+        
+    private var currentTrackTitle: String = ""
+    private var currentTrackArtist: String = ""
+    private var currentIsPlaying: Bool = false
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         
@@ -88,11 +89,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusBarMenu.addItem(
             withTitle: "Preferences...",
             action: #selector(showPreferences),
-            keyEquivalent: "")
+            keyEquivalent: ",")
         statusBarMenu.addItem(
             withTitle: "Quit Jukebox",
             action: #selector(NSApplication.terminate),
-            keyEquivalent: "")
+            keyEquivalent: "q")
         
         // Initialize Status Bar Item
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -184,15 +185,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     // Updates the title of the status bar with text (displays pause icon if track is not playing)
-    @objc func updateStatusBarItemTitle() {
+    @objc func updateStatusBarItemTitle(limit: CGFloat = Constants.Number.infinity) {
         
         // Get updated display text
         var text = ""
         if (showTitle) { text += currentTrackTitle }
-        text = text.isEmpty ? text : text + " • "
-        if (showArtist) { text += currentTrackArtist }
+        if (showArtist) { text += text.isEmpty ? currentTrackArtist : " • " + currentTrackArtist }
         
-        print("Text: " + text)
+//        print("Text: " + text)
         
         // Get status item button and marquee text view from button
         guard let button = statusBarItem.button else { return }
@@ -206,7 +206,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Set Marquee text with new track data
         marqueeText.text = text
         
-        let limit = Constants.StatusBar.statusBarButtonLimit
+        let limit = min(floor(statusBarButtonLimit), limit)  // from slider in preferences
         let animWidth = Constants.StatusBar.barAnimationWidth
         let padding = Constants.StatusBar.statusBarButtonPadding
         
@@ -222,7 +222,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             button.frame = NSRect(
                 x: 0,
                 y: 0,
-                width: stringWidth < limit ? stringWidth + animWidth + 3*padding : limit + animWidth + 3*padding,
+                width: min(stringWidth, limit) + animWidth + 3*padding,
                 height: button.bounds.height)
             marqueeText.menubarBounds = button.bounds
         }

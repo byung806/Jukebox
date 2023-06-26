@@ -19,8 +19,12 @@ enum Constants {
     enum StatusBar {
         static let marqueeFont = NSFont.systemFont(ofSize: 13, weight: .medium)
         static let barAnimationWidth: CGFloat = 14
-        static let statusBarButtonLimit: CGFloat = 200
+//        static let statusBarButtonLimit: CGFloat = 200
         static let statusBarButtonPadding: CGFloat = 8
+    }
+    
+    enum Number {
+        static let infinity: CGFloat = CGFloat.greatestFiniteMagnitude
     }
     
     enum Spotify {
