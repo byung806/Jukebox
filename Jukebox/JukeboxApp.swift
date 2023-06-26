@@ -11,19 +11,29 @@ import Sparkle
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     @AppStorage("viewedOnboarding") var viewedOnboarding: Bool = false
+    @AppStorage("showTitle") private var showTitle: Bool = true
+    @AppStorage("showArtist") private var showArtist: Bool = false
     @StateObject var contentViewVM = ContentViewModel()
+    static private(set) var instance: AppDelegate! = nil
     private var statusBarItem: NSStatusItem!
     private var statusBarMenu: NSMenu!
     private var popover: NSPopover!
     private var preferencesWindow: PreferencesWindow!
     private var onboardingWindow: OnboardingWindow!
     
+    public var currentTrackTitle: String = ""
+    public var currentTrackArtist: String = ""
+    public var currentIsPlaying: Bool = false
+    
     func applicationDidFinishLaunching(_ notification: Notification) {
+        
+        // So AppDelegate object can be accessed outside of this class
+        AppDelegate.instance = self
                 
         // Add observer to listen to when track changes to update the title in the menu bar
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(updateStatusBarItemTitle),
+            selector: #selector(updateStatusBarItemTitleWithNotif),
             name: NSNotification.Name("TrackChanged"),
             object: nil)
         
@@ -158,14 +168,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     // Updates the title of the status bar with the currently playing track
-    @objc func updateStatusBarItemTitle(_ notification: NSNotification) {
-
+    @objc func updateStatusBarItemTitleWithNotif(_ notification: NSNotification) {
+        
         // Get track data from notification
         guard let trackTitle = notification.userInfo?["title"] as? String else { return }
         guard let trackArtist = notification.userInfo?["artist"] as? String else { return }
         guard let isPlaying = notification.userInfo?["isPlaying"] as? Bool  else { return }
-        let titleAndArtist = trackTitle.isEmpty && trackArtist.isEmpty ? "" : "\(trackTitle) • \(trackArtist)"
-
+        
+        currentTrackTitle = trackTitle
+        currentTrackArtist = trackArtist
+        currentIsPlaying = isPlaying
+                
+        updateStatusBarItemTitle()
+        
+    }
+    
+    // Updates the title of the status bar with text (displays pause icon if track is not playing)
+    @objc func updateStatusBarItemTitle() {
+        
+        // Get updated display text
+        var text = ""
+        if (showTitle) { text += currentTrackTitle }
+        if (showArtist) { text += " • " + currentTrackArtist }
+        
+        print("Text: " + text)
+        
         // Get status item button and marquee text view from button
         guard let button = statusBarItem.button else { return }
         guard let barAnimation = button.subviews[0] as? StatusBarAnimation else { return }
@@ -173,29 +200,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         
         // Calculate string width
         let font = Constants.StatusBar.marqueeFont
-        let stringWidth = titleAndArtist.stringWidth(with: font)
+        let stringWidth = text.stringWidth(with: font)
         
         // Set Marquee text with new track data
-        marqueeText.text = titleAndArtist
+        marqueeText.text = text
         
         let limit = Constants.StatusBar.statusBarButtonLimit
         let animWidth = Constants.StatusBar.barAnimationWidth
         let padding = Constants.StatusBar.statusBarButtonPadding
         
-        if titleAndArtist.isEmpty {
-            barAnimation.isPlaying = false
+        // Update bar animation
+        barAnimation.isPlaying = currentIsPlaying
+        
+        if text.isEmpty {
+            // Set dimensions of menu bar extra to only animation
             button.frame = NSRect(x: 0, y: 0, width: barAnimation.bounds.width + 16, height: button.bounds.height)
             return
+        } else {
+            // Set dimensions of menu bar extra to animation + text
+            button.frame = NSRect(
+                x: 0,
+                y: 0,
+                width: stringWidth < limit ? stringWidth + animWidth + 3*padding : limit + animWidth + 3*padding,
+                height: button.bounds.height)
+            marqueeText.menubarBounds = button.bounds
         }
-        
-        // Set button frame
-        button.frame = NSRect(
-            x: 0,
-            y: 0,
-            width: stringWidth < limit ? stringWidth + animWidth + 3*padding : limit + animWidth + 3*padding,
-            height: button.bounds.height)
-        barAnimation.isPlaying = isPlaying
-        marqueeText.menubarBounds = button.bounds
 
     }
     

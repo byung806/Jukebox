@@ -14,6 +14,8 @@ struct PreferencesView: View {
     
     @AppStorage("visualizerStyle") private var visualizerStyle = VisualizerStyle.albumArt
     @AppStorage("connectedApp") private var connectedApp = ConnectedApps.spotify
+    @AppStorage("showTitle") private var showTitle = true
+    @AppStorage("showArtist") private var showArtist = false
     @State private var alertTitle = Text("Title")
     @State private var alertMessage = Text("Message")
     @State private var showingAlert = false
@@ -112,6 +114,12 @@ struct PreferencesView: View {
                     .font(.title2)
                     .fontWeight(.semibold)
                 LaunchAtLogin.Toggle()
+                Toggle("Show Title", isOn: $showTitle).onChange(of: showTitle) { _ in
+                    AppDelegate.instance.updateStatusBarItemTitle()
+                }
+                Toggle("Show Artist", isOn: $showArtist).onChange(of: showArtist) { _ in
+                    AppDelegate.instance.updateStatusBarItemTitle()
+                }
                 HStack {
                     Picker("Connect Jukebox to", selection: $connectedApp) {
                         ForEach(ConnectedApps.allCases, id: \.self) { value in
