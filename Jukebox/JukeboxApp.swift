@@ -45,10 +45,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             return
         }
         
-        // Setup
-        setupContentView()
-        setupStatusBar()
-        
     }
     
     // MARK: - Setup
@@ -114,7 +110,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 menubarAppearance: statusBarItemButton.effectiveAppearance)
             statusBarItemButton.addSubview(marqueeText)
             
-            statusBarItemButton.frame = NSRect(x: 0, y: 0, width: barAnimation.bounds.width + 16, height: statusBarItemButton.bounds.height)
+            statusBarItemButton.frame = NSRect(x: 0, y: 0, width: barAnimation.bounds.width + 2*Constants.StatusBar.statusBarButtonPadding, height: statusBarItemButton.bounds.height)
             marqueeText.menubarBounds = statusBarItemButton.bounds
             
             // Set Status Bar Item Button click action
@@ -215,7 +211,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         
         if text.isEmpty {
             // Set dimensions of menu bar extra to only animation
-            button.frame = NSRect(x: 0, y: 0, width: barAnimation.bounds.width + 16, height: button.bounds.height)
+            button.frame = NSRect(x: 0, y: 0, width: barAnimation.bounds.width + 2*padding, height: button.bounds.height)
             return
         } else {
             // Set dimensions of menu bar extra to animation + text

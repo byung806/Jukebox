@@ -34,9 +34,6 @@ class MenuMarqueeText: NSView {
         menubarIsDarkAppearance ? NSColor.white.cgColor : NSColor.black.cgColor
     }
     
-    // Constants
-    let padding: CGFloat = 16
-    
     // Properties
     private var maskLayer: CALayer!
     private var textLayer1: CATextLayer!
@@ -76,9 +73,9 @@ class MenuMarqueeText: NSView {
     
     private func setupTextLayer(isFirstLayer: Bool) -> CATextLayer {
         let font = Constants.StatusBar.marqueeFont
-        let stringWidth = text.stringWidth(with: font) + padding
+        let stringWidth = text.stringWidth(with: font) + Constants.StatusBar.marqueeAnimationSpacer
         let stringHeight = text.stringHeight(with: font)
-                
+        
         let textLayer = CATextLayer()
         textLayer.string = NSAttributedString(
             string: text,
@@ -88,7 +85,7 @@ class MenuMarqueeText: NSView {
             ])
         
         textLayer.frame = CGRect(
-            x: isFirstLayer ? 0 : stringWidth + padding,
+            x: isFirstLayer ? 0 : stringWidth,
             y: (menubarBounds.height / 2) - (stringHeight / 2),
             width: stringWidth,
             height: stringHeight)
@@ -97,9 +94,9 @@ class MenuMarqueeText: NSView {
             textLayer.contentsScale = backingScaleFactor
         }
         
-        if stringWidth - padding < 200 { return textLayer }
+        if stringWidth <= menubarBounds.width - Constants.StatusBar.barAnimationWidth - 8 { return textLayer }
         
-        let duration = stringWidth / 30
+        let duration = (stringWidth - Constants.StatusBar.marqueeAnimationSpacer) / 30
         let delay = 3.0
         
         let animation = CABasicAnimation(keyPath: "position.x")
