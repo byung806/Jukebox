@@ -97,7 +97,7 @@ class MenuMarqueeText: NSView {
         if stringWidth <= menubarBounds.width - Constants.StatusBar.barAnimationWidth - 8 { return textLayer }
         
         let duration = (stringWidth - Constants.StatusBar.marqueeAnimationSpacer) / 30
-        let delay = 3.0
+        let delay = Constants.StatusBar.marqueeAnimationDelay
         
         let animation = CABasicAnimation(keyPath: "position.x")
         animation.fromValue = isFirstLayer ? 0 + stringWidth / 2 : stringWidth + stringWidth / 2

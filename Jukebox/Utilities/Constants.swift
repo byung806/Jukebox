@@ -19,6 +19,7 @@ enum Constants {
     enum StatusBar {
         static let marqueeFont = NSFont.systemFont(ofSize: 13, weight: .medium)
         static let marqueeAnimationSpacer: CGFloat = 16
+        static let marqueeAnimationDelay: CGFloat = 3
         static let barAnimationWidth: CGFloat = 14
         static let statusBarButtonPadding: CGFloat = 8
     }
