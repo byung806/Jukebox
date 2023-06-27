@@ -21,6 +21,8 @@ enum Constants {
         static let marqueeAnimationSpacer: CGFloat = 16
         static let marqueeAnimationDelay: CGFloat = 3
         static let barAnimationWidth: CGFloat = 14
+        static let marqueeWidthBeforeHidden: CGFloat = 30
+        static let defaultStatusBarButtonLimit: CGFloat = 110
         static let statusBarButtonPadding: CGFloat = 8
     }
     

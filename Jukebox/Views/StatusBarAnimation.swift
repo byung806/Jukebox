@@ -7,6 +7,7 @@
 
 import Foundation
 import AppKit
+//import SwiftUI
 
 class StatusBarAnimation: NSView {
     
@@ -51,6 +52,13 @@ class StatusBarAnimation: NSView {
             y: 0,
             width: Constants.StatusBar.barAnimationWidth,
             height: menubarHeight))
+//        var image = NSImage(systemSymbolName: "pause.circle", accessibilityDescription: nil) {
+//            didSet {
+//                        needsDisplay = true
+//                    }
+//        }
+//        print(self.bounds)
+//        image?.draw(in: self.bounds)
         self.wantsLayer = true
         
         animate()

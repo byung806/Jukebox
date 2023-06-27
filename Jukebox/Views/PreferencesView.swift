@@ -16,7 +16,8 @@ struct PreferencesView: View {
     @AppStorage("connectedApp") private var connectedApp = ConnectedApps.spotify
     @AppStorage("showTitle") private var showTitle = true
     @AppStorage("showArtist") private var showArtist = false
-    @AppStorage("statusBarButtonLimit") private var statusBarButtonLimit = 300.0
+    @AppStorage("ignoreParentheses") private var ignoreParentheses = false
+    @AppStorage("statusBarButtonLimit") private var statusBarButtonLimit = Constants.StatusBar.defaultStatusBarButtonLimit
     @State private var alertTitle = Text("Title")
     @State private var alertMessage = Text("Message")
     @State private var showingAlert = false
@@ -121,12 +122,16 @@ struct PreferencesView: View {
                 Toggle("Show Artist", isOn: $showArtist).onChange(of: showArtist) { _ in
                     AppDelegate.instance.updateStatusBarItemTitle()
                 }
+                Toggle("Ignore Parentheses", isOn: $ignoreParentheses).onChange(of: ignoreParentheses) { _ in
+                    AppDelegate.instance.updateStatusBarItemTitle()
+                }
                 HStack(alignment: .top) {
                     Text("Width Limit")
                     
                     VStack {
                         Slider(value: $statusBarButtonLimit,
                                in: 0...500,
+                               step: 10,
                                onEditingChanged: { editing in
                                    AppDelegate.instance.updateStatusBarItemTitle()
                                }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B4BC356D2A4B8B7600E5F7BD /* String+Parentheses.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BC356C2A4B8B7600E5F7BD /* String+Parentheses.swift */; };
 		E800A8B22732811D00DBDF0E /* MenuMarqueeText.swift in Sources */ = {isa = PBXBuildFile; fileRef = E800A8B12732811D00DBDF0E /* MenuMarqueeText.swift */; };
 		E80AD61D27859020001FC303 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E80AD61C27859020001FC303 /* Sparkle */; };
 		E81CFEC227A12ED60030C448 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81CFEC127A12ED60030C448 /* Helper.swift */; };
@@ -42,6 +43,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B4BC356C2A4B8B7600E5F7BD /* String+Parentheses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Parentheses.swift"; sourceTree = "<group>"; };
 		E800A8B12732811D00DBDF0E /* MenuMarqueeText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuMarqueeText.swift; sourceTree = "<group>"; };
 		E81CFEC127A12ED60030C448 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		E82271BB2735514400D1795D /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -205,6 +207,7 @@
 				E8E00583272FFC8000D8AE1B /* NSAttributedString+Dimensions.swift */,
 				E8A3371B2798258C0094A6D7 /* UserDefaults+Keys.swift */,
 				E89C3498279B71E6000897F0 /* NSImage+Empty.swift */,
+				B4BC356C2A4B8B7600E5F7BD /* String+Parentheses.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -258,7 +261,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1300;
-				LastUpgradeCheck = 1320;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					E8F5722627166E0D00C5DF9C = {
 						CreatedOnToolsVersion = 13.0;
@@ -302,6 +305,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		E8767C67273689D400E39D17 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -352,6 +356,7 @@
 				E87F08C22782E2AC00742DA1 /* BaseWarp.metal in Sources */,
 				E8FB63F2272BB495006F28B8 /* PreferencesWindow.swift in Sources */,
 				E8F5724527167CAF00C5DF9C /* Track.swift in Sources */,
+				B4BC356D2A4B8B7600E5F7BD /* String+Parentheses.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -392,6 +397,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -454,6 +460,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -485,6 +492,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 0.9.5;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Jukebox/Preview Content\"";
 				DEVELOPMENT_TEAM = LD29YDA94X;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -521,6 +529,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 0.9.5;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Jukebox/Preview Content\"";
 				DEVELOPMENT_TEAM = LD29YDA94X;
 				ENABLE_HARDENED_RUNTIME = YES;

@@ -13,7 +13,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @AppStorage("viewedOnboarding") var viewedOnboarding: Bool = false
     @AppStorage("showTitle") private var showTitle: Bool = true
     @AppStorage("showArtist") private var showArtist: Bool = false
-    @AppStorage("statusBarButtonLimit") private var statusBarButtonLimit = 300.0
+    @AppStorage("ignoreParentheses") private var ignoreParentheses = false
+    @AppStorage("statusBarButtonLimit") private var statusBarButtonLimit = Constants.StatusBar.defaultStatusBarButtonLimit
     @StateObject var contentViewVM = ContentViewModel()
     static private(set) var instance: AppDelegate! = nil
     private var statusBarItem: NSStatusItem!
@@ -185,8 +186,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         
         // Get updated display text
         var text = ""
-        if (showTitle) { text += currentTrackTitle }
-        if (showArtist) { text += text.isEmpty ? currentTrackArtist : " • " + currentTrackArtist }
+        
+        if !onlyAnimation {
+            if (showTitle) {
+                text += ignoreParentheses ? currentTrackTitle.getWithoutParentheses() : currentTrackTitle
+            }
+            if (showArtist) {
+                if !text.isEmpty { text += " • " }
+                text += ignoreParentheses ? currentTrackArtist.getWithoutParentheses() : currentTrackArtist
+            }
+        }
         
 //        print("Text: " + text)
         
