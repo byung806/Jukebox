@@ -3,6 +3,7 @@
 //  Jukebox
 //
 //  Created by Sasindu Jayasinghe on 3/11/21.
+//  Modified by Bryan Yung.
 //
 
 import AppKit
@@ -97,7 +98,7 @@ class MenuMarqueeText: NSView {
         if stringWidth <= menubarBounds.width - Constants.StatusBar.barAnimationWidth - 8 { return textLayer }
         
         let duration = (stringWidth - Constants.StatusBar.marqueeAnimationSpacer) / 30
-        let delay = Constants.StatusBar.marqueeAnimationDelay
+        let delay = UserDefaults.standard.double(forKey: "marqueeAnimationDelay")
         
         let animation = CABasicAnimation(keyPath: "position.x")
         animation.fromValue = isFirstLayer ? 0 + stringWidth / 2 : stringWidth + stringWidth / 2

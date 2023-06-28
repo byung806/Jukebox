@@ -17,6 +17,7 @@ struct PreferencesView: View {
     @AppStorage("connectedApp") private var connectedApp = ConnectedApps.spotify
     @AppStorage("showTitle") private var showTitle = true
     @AppStorage("showArtist") private var showArtist = false
+    @AppStorage("marqueeAnimationDelay") private var marqueeAnimationDelay = 3
     @AppStorage("ignoreParentheses") private var ignoreParentheses = false
     @AppStorage("dynamicResizing") private var dynamicResizing = true
     @AppStorage("statusBarButtonLimit") private var statusBarButtonLimit = Constants.StatusBar.defaultStatusBarButtonLimit
@@ -91,9 +92,16 @@ struct PreferencesView: View {
             
             HStack {
                 Button {
-                    NSWorkspace.shared.open(Constants.AppInfo.repo)
+                    NSWorkspace.shared.open(Constants.AppInfo.forkedRepo)
                 } label: {
-                    Text("GitHub").font(.system(size: 12))
+                    Text("GitHub (this fork)").font(.system(size: 12))
+                }
+                .buttonStyle(LinkButtonStyle())
+                
+                Button {
+                    NSWorkspace.shared.open(Constants.AppInfo.originalRepo)
+                } label: {
+                    Text("GitHub (original)").font(.system(size: 12))
                 }
                 .buttonStyle(LinkButtonStyle())
                 
@@ -161,7 +169,7 @@ struct PreferencesView: View {
                     .font(.title2)
                     .fontWeight(.semibold)
                 HStack() {
-                    Text("Width Limit")
+                    Text("Maximum Width")
                     Slider(value: $statusBarButtonLimit,
                            in: 30...500,
                            onEditingChanged: { editing in
@@ -171,12 +179,24 @@ struct PreferencesView: View {
                     Text(statusBarButtonLimit == 500 ? "Infinite" : String(format: "%.0f px", statusBarButtonLimit))
                 }
                 HStack() {
-                    Text("Show: ")
+                    Text("Show")
                     Toggle("Title", isOn: $showTitle).onChange(of: showTitle) { _ in
                         AppDelegate.instance.updateStatusBarItemTitle()
                     }
                     Toggle("Artist", isOn: $showArtist).onChange(of: showArtist) { _ in
                         AppDelegate.instance.updateStatusBarItemTitle()
+                    }
+                }
+                HStack() {
+                    Text("Animation Delay")
+                    TextField("",
+                              value: $marqueeAnimationDelay,
+                              formatter: NumberFormatter()).disabled(true).foregroundColor(.black).frame(width: 50)
+                    Stepper {
+                    } onIncrement: {
+                        marqueeAnimationDelay = min(10, marqueeAnimationDelay + 1)
+                    } onDecrement: {
+                        marqueeAnimationDelay = max(0, marqueeAnimationDelay - 1)
                     }
                 }
                 Toggle("Ignore Parentheses", isOn: $ignoreParentheses).onChange(of: ignoreParentheses) { _ in
