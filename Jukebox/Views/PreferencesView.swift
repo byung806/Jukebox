@@ -18,6 +18,7 @@ struct PreferencesView: View {
     @AppStorage("showTitle") private var showTitle = true
     @AppStorage("showArtist") private var showArtist = false
     @AppStorage("ignoreParentheses") private var ignoreParentheses = false
+    @AppStorage("dynamicResizing") private var dynamicResizing = true
     @AppStorage("statusBarButtonLimit") private var statusBarButtonLimit = Constants.StatusBar.defaultStatusBarButtonLimit
     @State private var alertTitle = Text("Title")
     @State private var alertMessage = Text("Message")
@@ -117,25 +118,6 @@ struct PreferencesView: View {
                     .font(.title2)
                     .fontWeight(.semibold)
                 LaunchAtLogin.Toggle()
-                Toggle("Show Title", isOn: $showTitle).onChange(of: showTitle) { _ in
-                    AppDelegate.instance.updateStatusBarItemTitle()
-                }
-                Toggle("Show Artist", isOn: $showArtist).onChange(of: showArtist) { _ in
-                    AppDelegate.instance.updateStatusBarItemTitle()
-                }
-                Toggle("Ignore Parentheses", isOn: $ignoreParentheses).onChange(of: ignoreParentheses) { _ in
-                    AppDelegate.instance.updateStatusBarItemTitle()
-                }
-                HStack() {
-                    Text("Width Limit")
-                    Slider(value: $statusBarButtonLimit,
-                           in: 30...500,
-                           onEditingChanged: { editing in
-                               AppDelegate.instance.updateStatusBarItemTitle()
-                           }
-                    )
-                    Text(statusBarButtonLimit == 500 ? "Infinite" : String(format: "%.0f px", statusBarButtonLimit))
-                }
                 HStack {
                     Picker("Connect Jukebox to", selection: $connectedApp) {
                         ForEach(ConnectedApps.allCases, id: \.self) { value in
@@ -167,6 +149,41 @@ struct PreferencesView: View {
                         Alert(title: alertTitle, message: alertMessage, dismissButton: .default(Text("Got it!")))
                     }
                     
+                }
+            }
+            .padding()
+            
+            Divider()
+            
+            // Menu Bar Display Pane
+            VStack(alignment: .leading) {
+                Text("Menu Bar Display")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                HStack() {
+                    Text("Width Limit")
+                    Slider(value: $statusBarButtonLimit,
+                           in: 30...500,
+                           onEditingChanged: { editing in
+                        AppDelegate.instance.updateStatusBarItemTitle()
+                    }
+                    )
+                    Text(statusBarButtonLimit == 500 ? "Infinite" : String(format: "%.0f px", statusBarButtonLimit))
+                }
+                HStack() {
+                    Text("Show: ")
+                    Toggle("Title", isOn: $showTitle).onChange(of: showTitle) { _ in
+                        AppDelegate.instance.updateStatusBarItemTitle()
+                    }
+                    Toggle("Artist", isOn: $showArtist).onChange(of: showArtist) { _ in
+                        AppDelegate.instance.updateStatusBarItemTitle()
+                    }
+                }
+                Toggle("Ignore Parentheses", isOn: $ignoreParentheses).onChange(of: ignoreParentheses) { _ in
+                    AppDelegate.instance.updateStatusBarItemTitle()
+                }
+                Toggle("Dynamic Resizing (Experimental)", isOn: $dynamicResizing).onChange(of: dynamicResizing) { _ in
+                    AppDelegate.instance.updateStatusBarItemTitle()
                 }
                 
             }

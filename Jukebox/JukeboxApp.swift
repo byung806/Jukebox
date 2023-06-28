@@ -15,6 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @AppStorage("showTitle") private var showTitle: Bool = true
     @AppStorage("showArtist") private var showArtist: Bool = false
     @AppStorage("ignoreParentheses") private var ignoreParentheses = false
+    @AppStorage("dynamicResizing") private var dynamicResizing = true
     @AppStorage("statusBarButtonLimit") private var statusBarButtonLimit = Constants.StatusBar.defaultStatusBarButtonLimit
     @StateObject var contentViewVM = ContentViewModel()
     static private(set) var instance: AppDelegate! = nil
@@ -247,9 +248,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         marqueeText.text = text
         
         // Used when limit is set to infinite
-        var upperLimitForced = floor(upperLimitForced)
+        let upperLimitForced = floor(upperLimitForced)
         // Used when limit is set below infinite
-        var upperLimit = min(floor(statusBarButtonLimit), upperLimitForced)
+        let upperLimit = min(floor(statusBarButtonLimit), upperLimitForced)
         
         let marqueeWidthInfiniteInPreferences = statusBarButtonLimit == Constants.StatusBar.marqueeInfiniteWidthInPreferences
         
@@ -262,7 +263,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if text.isEmpty || upperLimit == 0 || onlyAnimation {
             // Set dimensions of menu bar extra to only animation
             button.frame = NSRect(x: 0, y: 0, width: barAnimation.bounds.width + 2*padding, height: button.bounds.height)
-            perform(#selector(stopIgnoringForceNotifs), with: nil, afterDelay: 0.04)
+            perform(#selector(stopIgnoringForceNotifs), with: nil, afterDelay: 0.05)
             return
         } else {
             // Set dimensions of menu bar extra to animation + text
@@ -276,16 +277,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         
         ignoreForceHiddenNotifs = true
         
-        perform(#selector(downsizeStatusBarItemTitle), with: [button, upperLimit, statusBarItemResizeDecrement] as [Any], afterDelay: 0.01)
+        // Decrement all the way to 0 if dynamic resizing is off
+        let decrement = dynamicResizing ? statusBarItemResizeDecrement : upperLimit
+        
+        perform(#selector(downsizeStatusBarItemTitle), with: [button, upperLimit, decrement] as [Any], afterDelay: 0.02)
     }
     
     @objc func downsizeStatusBarItemTitle(_ arg: NSArray) {
         let button: NSStatusBarButton = arg[0] as! NSStatusBarButton
+        
+        let lowerLimit = Constants.StatusBar.marqueeWidthBeforeHidden
         let upperLimit: CGFloat = arg[1] as! CGFloat
+        
         let decrement: CGFloat = arg[2] as! CGFloat
         let forceHidden = button.window?.occlusionState.contains(.visible) == false
         
-        let newValue: CGFloat = max(0, upperLimit - decrement)
+        var newValue: CGFloat = upperLimit - decrement
+        if newValue < lowerLimit {
+            newValue = 0
+        }
         
 //        print("Trying to resize because hidden", forceHidden, "new limit:", newValue)
         
