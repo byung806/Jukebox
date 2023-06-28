@@ -252,7 +252,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Used when limit is set below infinite
         let upperLimit = min(floor(statusBarButtonLimit), upperLimitForced)
         
-        let marqueeWidthInfiniteInPreferences = statusBarButtonLimit == Constants.StatusBar.marqueeInfiniteWidthInPreferences
+        let marqueeWidthInfiniteInPreferences = statusBarButtonLimit == Constants.StatusBar.marqueeInfiniteWidth
         
         let animWidth = Constants.StatusBar.barAnimationWidth
         let padding = Constants.StatusBar.statusBarButtonPadding
@@ -286,7 +286,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func downsizeStatusBarItemTitle(_ arg: NSArray) {
         let button: NSStatusBarButton = arg[0] as! NSStatusBarButton
         
-        let lowerLimit = Constants.StatusBar.marqueeWidthBeforeHidden
+        let lowerLimit = Constants.StatusBar.marqueeMinimumWidth
         let upperLimit: CGFloat = arg[1] as! CGFloat
         
         let decrement: CGFloat = arg[2] as! CGFloat

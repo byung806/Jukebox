@@ -18,14 +18,14 @@ enum Constants {
     }
     
     enum StatusBar {
-        static let marqueeFont = NSFont.systemFont(ofSize: 13, weight: .medium)
-        static let marqueeAnimationSpacer: CGFloat = 16
-        static let marqueeAnimationDelay: CGFloat = 3
         static let barAnimationWidth: CGFloat = 14
-        static let marqueeWidthBeforeHidden: CGFloat = 30
-        static let marqueeInfiniteWidthInPreferences: CGFloat = 500
-        static let defaultStatusBarButtonLimit: CGFloat = 110
-        static let statusBarButtonPadding: CGFloat = 8
+        static let marqueeFont = NSFont.systemFont(ofSize: 13, weight: .medium)
+        static let marqueeAnimationSpacer: CGFloat = 16              // space between repeating title in animatino
+        static let marqueeAnimationDelay: CGFloat = 3                // time in seconds between animations
+        static let marqueeMinimumWidth: CGFloat = 30                 // absolute minimum width before text is hidden entirely
+        static let marqueeInfiniteWidth: CGFloat = 500               // constant to represent infinite in preferences
+        static let defaultStatusBarButtonLimit: CGFloat = 300        // absolute maximum width text can have
+        static let statusBarButtonPadding: CGFloat = 8               // padding between elements in status bar item
     }
     
     enum Number {
