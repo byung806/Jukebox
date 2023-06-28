@@ -13,7 +13,8 @@ enum Constants {
     
     enum AppInfo {
         static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-        static let repo = URL(string: "https://github.com/Jaysce/Jukebox")!
+        static let originalRepo = URL(string: "https://github.com/Jaysce/Jukebox")!
+        static let forkedRepo = URL(string: "https://github.com/byung806/Jukebox")!
         static let website = URL(string: "https://jaysce.dev/projects/jukebox")!
     }
     

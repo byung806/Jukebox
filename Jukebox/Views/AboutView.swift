@@ -11,7 +11,7 @@ struct AboutView: View {
     
     var body: some View {
         HStack {
-            Link(destination: Constants.AppInfo.repo) {
+            Link(destination: Constants.AppInfo.originalRepo) {
                 Image(nsImage: NSImage(named: "AppIcon") ?? NSImage())
                     .resizable()
                     .scaledToFit()
