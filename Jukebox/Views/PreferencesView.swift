@@ -3,6 +3,7 @@
 //  Jukebox
 //
 //  Created by Sasindu Jayasinghe on 29/10/21.
+//  Modified by Bryan Yung.
 //
 
 import SwiftUI
@@ -125,19 +126,15 @@ struct PreferencesView: View {
                 Toggle("Ignore Parentheses", isOn: $ignoreParentheses).onChange(of: ignoreParentheses) { _ in
                     AppDelegate.instance.updateStatusBarItemTitle()
                 }
-                HStack(alignment: .top) {
+                HStack() {
                     Text("Width Limit")
-                    
-                    VStack {
-                        Slider(value: $statusBarButtonLimit,
-                               in: 0...500,
-                               step: 10,
-                               onEditingChanged: { editing in
-                                   AppDelegate.instance.updateStatusBarItemTitle()
-                               }
-                        )
-                        Text(String(format: "Current value: %.0f. Set to 0 for no limit.", statusBarButtonLimit)).foregroundColor(.gray)
-                    }
+                    Slider(value: $statusBarButtonLimit,
+                           in: 30...500,
+                           onEditingChanged: { editing in
+                               AppDelegate.instance.updateStatusBarItemTitle()
+                           }
+                    )
+                    Text(statusBarButtonLimit == 500 ? "Infinite" : String(format: "%.0f px", statusBarButtonLimit))
                 }
                 HStack {
                     Picker("Connect Jukebox to", selection: $connectedApp) {

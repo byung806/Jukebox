@@ -3,6 +3,7 @@
 //  Jukebox
 //
 //  Created by Sasindu Jayasinghe on 6/11/21.
+//  Modified by Bryan Yung.
 //
 
 import Foundation
@@ -22,6 +23,7 @@ enum Constants {
         static let marqueeAnimationDelay: CGFloat = 3
         static let barAnimationWidth: CGFloat = 14
         static let marqueeWidthBeforeHidden: CGFloat = 30
+        static let marqueeInfiniteWidthInPreferences: CGFloat = 500
         static let defaultStatusBarButtonLimit: CGFloat = 110
         static let statusBarButtonPadding: CGFloat = 8
     }

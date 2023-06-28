@@ -217,7 +217,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     // Updates the title of the status bar with text (displays pause icon if track is not playing)
-    @objc func updateStatusBarItemTitle(upperLimit: CGFloat = Constants.Number.infinity, onlyAnimation: Bool = false) {
+    @objc func updateStatusBarItemTitle(upperLimitForced: CGFloat = Constants.Number.infinity, onlyAnimation: Bool = false) {
         
         // Get updated display text
         var text = ""
@@ -246,7 +246,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Set Marquee text with new track data
         marqueeText.text = text
         
-        let upperLimit = min(floor(statusBarButtonLimit), floor(upperLimit))  // from slider in preferences
+        // Used when limit is set to infinite
+        var upperLimitForced = floor(upperLimitForced)
+        // Used when limit is set below infinite
+        var upperLimit = min(floor(statusBarButtonLimit), upperLimitForced)
+        
+        let marqueeWidthInfiniteInPreferences = statusBarButtonLimit == Constants.StatusBar.marqueeInfiniteWidthInPreferences
+        
         let animWidth = Constants.StatusBar.barAnimationWidth
         let padding = Constants.StatusBar.statusBarButtonPadding
         
@@ -256,21 +262,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if text.isEmpty || upperLimit == 0 || onlyAnimation {
             // Set dimensions of menu bar extra to only animation
             button.frame = NSRect(x: 0, y: 0, width: barAnimation.bounds.width + 2*padding, height: button.bounds.height)
-            perform(#selector(stopIgnoringForceNotifs), with: nil, afterDelay: 0.05)
+            perform(#selector(stopIgnoringForceNotifs), with: nil, afterDelay: 0.04)
             return
         } else {
             // Set dimensions of menu bar extra to animation + text
             button.frame = NSRect(
                 x: 0,
                 y: 0,
-                width: min(stringWidth, upperLimit) + animWidth + 3*padding,
+                width: min(stringWidth, marqueeWidthInfiniteInPreferences ? upperLimitForced : upperLimit) + animWidth + 3*padding,
                 height: button.bounds.height)
             marqueeText.menubarBounds = button.bounds
         }
         
         ignoreForceHiddenNotifs = true
         
-        perform(#selector(downsizeStatusBarItemTitle), with: [button, upperLimit, statusBarItemResizeDecrement] as [Any], afterDelay: 0.02)
+        perform(#selector(downsizeStatusBarItemTitle), with: [button, upperLimit, statusBarItemResizeDecrement] as [Any], afterDelay: 0.01)
     }
     
     @objc func downsizeStatusBarItemTitle(_ arg: NSArray) {
@@ -284,7 +290,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 //        print("Trying to resize because hidden", forceHidden, "new limit:", newValue)
         
         if forceHidden {
-            updateStatusBarItemTitle(upperLimit: newValue)
+            updateStatusBarItemTitle(upperLimitForced: newValue)
         } else {
             stopIgnoringForceNotifs()
         }
