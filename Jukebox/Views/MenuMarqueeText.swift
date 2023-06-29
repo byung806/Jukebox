@@ -123,8 +123,10 @@ class MenuMarqueeText: NSView {
         
         self.frame = menubarBounds
         self.maskLayer.sublayers?.removeAll()
-        self.maskLayer.frame = NSRect(x: 30, y: 0, width: menubarBounds.width - 30 - 8, height: menubarBounds.height)
-                
+        let offsetX = Constants.StatusBar.statusBarButtonPadding * 2 + Constants.StatusBar.barAnimationWidth
+        let textWidth = menubarBounds.width - Constants.StatusBar.statusBarButtonPadding * 3 - Constants.StatusBar.barAnimationWidth
+        self.maskLayer.frame = NSRect(x: offsetX, y: 0, width: textWidth, height: menubarBounds.height)
+        
         self.textLayer1 = setupTextLayer(isFirstLayer: true)
         self.textLayer2 = setupTextLayer(isFirstLayer: false)
         maskLayer.addSublayer(textLayer1)

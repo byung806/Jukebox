@@ -3,6 +3,7 @@
 //  Jukebox
 //
 //  Created by Sasindu Jayasinghe on 31/10/21.
+//  Modified by Bryan Yung.
 //
 
 import Foundation
@@ -40,6 +41,7 @@ class StatusBarAnimation: NSView {
         return true
     }
     
+//    let barHeights = [16.0, 16.0, 16.0, 16.0]
     let barHeights = [7.0, 6.0, 9.0, 8.0]
     let barDurations = [0.6, 0.3, 0.5, 0.7]
     
@@ -47,11 +49,16 @@ class StatusBarAnimation: NSView {
         self.menubarIsDarkAppearance = menubarAppearance.name == .vibrantDark ? true : false
         self.isPlaying = isPlaying
         self.menubarHeight = menubarHeight
+        print(menubarHeight, Constants.StatusBar.barAnimationHeight)
+        let animationHeight = Constants.StatusBar.barAnimationHeight
+        
+        print("Y", (menubarHeight / 2) - animationHeight / 2)
+        
         super.init(frame: CGRect(
             x: Constants.StatusBar.statusBarButtonPadding,
-            y: 0,
+            y: (menubarHeight / 2) - animationHeight / 2,
             width: Constants.StatusBar.barAnimationWidth,
-            height: menubarHeight))
+            height: animationHeight))
 //        var image = NSImage(systemSymbolName: "pause.circle", accessibilityDescription: nil) {
 //            didSet {
 //                        needsDisplay = true
@@ -67,13 +74,22 @@ class StatusBarAnimation: NSView {
     func animate() {
         self.layer?.sublayers?.removeAll()
         bars.removeAll()
+        
+        let animationWidth = Constants.StatusBar.barAnimationWidth
+        let animationHeight = Constants.StatusBar.barAnimationHeight
+        
+        let barHeightMultiplier: CGFloat = animationHeight / barHeights.max()!
+        
         for i in 0..<barHeights.count {
             let bar = CALayer()
             bar.backgroundColor = backgroundColor
             bar.cornerRadius = isPlaying ? 1 : 2
             bar.cornerCurve = .continuous
             bar.anchorPoint = .zero
-            bar.frame = CGRect(x: isPlaying ? Double(i) * 3.5 : Double(i) * 8, y: (menubarHeight / 2) - 5, width: isPlaying ? 2.0 : 6.0, height: isPlaying ? barHeights[i] : 10.0)
+            bar.frame = CGRect(x: isPlaying ? Double(i) * (animationWidth / 4.0) + 1.0 : Double(i) * 8,  // +1 to adjust for space between bars
+                               y: 0,
+                               width: isPlaying ? 2.0 : 6.0,  // bar width
+                               height: isPlaying ? (barHeights[i] * barHeightMultiplier) + 1.0 : animationHeight)  // +1 to adjust for visual center
             self.layer?.addSublayer(bar)
             
             // Return early if not playing music
