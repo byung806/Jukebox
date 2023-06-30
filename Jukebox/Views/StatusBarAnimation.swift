@@ -49,10 +49,8 @@ class StatusBarAnimation: NSView {
         self.menubarIsDarkAppearance = menubarAppearance.name == .vibrantDark ? true : false
         self.isPlaying = isPlaying
         self.menubarHeight = menubarHeight
-        print(menubarHeight, Constants.StatusBar.barAnimationHeight)
+
         let animationHeight = Constants.StatusBar.barAnimationHeight
-        
-        print("Y", (menubarHeight / 2) - animationHeight / 2)
         
         super.init(frame: CGRect(
             x: Constants.StatusBar.statusBarButtonPadding,
