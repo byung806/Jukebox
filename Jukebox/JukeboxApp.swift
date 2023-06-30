@@ -27,7 +27,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     // For dynamic status bar item sizing
     private var ignoreForceHiddenNotifs: Bool = false  // set to true when trying different sizes of status bar items
-    private let statusBarItemResizeDecrement: CGFloat = 10  // how much Jukebox will try to decrease the size of the status bar item to make it fit
+    private let statusBarItemResizeDecrement: CGFloat = 48  // how much Jukebox will try to decrease the size of the status bar item to make it fit
     
     private var currentTrackTitle: String = ""
     private var currentTrackArtist: String = ""
@@ -66,11 +66,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 //            let forceHidden = self.statusBarItem.button!.window?.occlusionState.contains(.visible) == false
 
 //            print("Force-hidden:", forceHidden)
-            self.updateStatusBarItemTitle()
+            self.updateStatusBarItem()
             
         }
         
-        self.updateStatusBarItemTitle()
+        self.updateStatusBarItem()
         
     }
     
@@ -187,6 +187,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusBarItem.menu = nil
     }
     
+    @objc func closePopover(_ sender: NSStatusBarButton?) {
+        guard let statusBarItemButton = sender else { return }
+        
+        if popover.isShown {
+            popover.performClose(statusBarItemButton)
+        }
+    }
+    
     // Toggle open and close of popover
     @objc func togglePopover(_ sender: NSStatusBarButton?) {
         
@@ -213,66 +221,78 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         currentTrackArtist = trackArtist
         currentIsPlaying = isPlaying
                 
-        updateStatusBarItemTitle()
+        updateStatusBarItem()
         
     }
     
-    // Updates the title of the status bar with text (displays pause icon if track is not playing)
-    @objc func updateStatusBarItemTitle(upperLimitForced: CGFloat = Constants.Number.infinity, onlyAnimation: Bool = false) {
+    // Updates the title of the status bar(displays pause icon if track is not playing)
+    @objc func updateStatusBarItem(forceHiddenRestrictedWidth: CGFloat = Constants.Number.infinity) {
+                
+        // Get status item button (whole status bar item)
+        guard let button = statusBarItem.button else { return }
         
-        // Get updated display text
+        let widthPreferenceInfinite = statusBarButtonLimit == Constants.StatusBar.marqueeInfiniteWidth
+        // Absolute limit for width of status bar item. Uses min() because Jukebox tries to restrict width when item is force hidden
+        let upperLimit = min(widthPreferenceInfinite ? Constants.Number.infinity : floor(statusBarButtonLimit),
+                             forceHiddenRestrictedWidth)
+        
+        
+        // Get animation/icon part of status bar item
+        guard let barAnimation = button.subviews[0] as? StatusBarAnimation else { return }
+        // Update bar animation
+        let togglePlayPause = barAnimation.isPlaying != currentIsPlaying
+        if togglePlayPause { barAnimation.isPlaying = currentIsPlaying }
+        
+        
+        // Get text part of status bar item
+        guard let marqueeText = button.subviews[1] as? MenuMarqueeText else { return }
+        
+        // Calculate updated display text
         var text = ""
-        
-        if !onlyAnimation {
-            if (showTitle) {
-                text += ignoreParentheses ? currentTrackTitle.getWithoutParentheses() : currentTrackTitle
-            }
-            if (showArtist) {
-                if !text.isEmpty { text += " • " }
-                text += ignoreParentheses ? currentTrackArtist.getWithoutParentheses() : currentTrackArtist
-            }
+        // Only update text if text is showing
+        if (showTitle) {
+            text += ignoreParentheses ? currentTrackTitle.getWithoutParentheses() : currentTrackTitle
+        }
+        if (showArtist) {
+            if !text.isEmpty { text += " • " }
+            text += ignoreParentheses ? currentTrackArtist.getWithoutParentheses() : currentTrackArtist
         }
         
-        // print("Text: " + text)
-        
-        // Get status item button and marquee text view from button
-        guard let button = statusBarItem.button else { return }
-        guard let barAnimation = button.subviews[0] as? StatusBarAnimation else { return }
-        guard let marqueeText = button.subviews[1] as? MenuMarqueeText else { return }
         
         // Calculate string width
         let font = Constants.StatusBar.marqueeFont
         let stringWidth = text.stringWidth(with: font)
         
         // Set Marquee text with new track data
-        marqueeText.text = text
-        
-        // Used when limit is set to infinite
-        let upperLimitForced = floor(upperLimitForced)
-        // Used when limit is set below infinite
-        let upperLimit = min(floor(statusBarButtonLimit), upperLimitForced)
-        
-        let marqueeWidthInfiniteInPreferences = statusBarButtonLimit == Constants.StatusBar.marqueeInfiniteWidth
+        if marqueeText.text != text {
+            // New text (either new song or text updating from a preference change)
+            marqueeText.text = text
+//            closePopover(button)
+        }
         
         let animWidth = Constants.StatusBar.barAnimationWidth
         let padding = Constants.StatusBar.statusBarButtonPadding
         
-        // Update bar animation
-        barAnimation.isPlaying = currentIsPlaying
-        
-        if text.isEmpty || upperLimit == 0 || onlyAnimation {
-            // Set dimensions of menu bar extra to only animation
-            button.frame = NSRect(x: 0, y: 0, width: barAnimation.bounds.width + 2*padding, height: button.bounds.height)
-            perform(#selector(stopIgnoringForceNotifs), with: nil, afterDelay: 0.05)
-            return
-        } else {
-            // Set dimensions of menu bar extra to animation + text
-            button.frame = NSRect(
-                x: 0,
-                y: 0,
-                width: min(stringWidth, marqueeWidthInfiniteInPreferences ? upperLimitForced : upperLimit) + animWidth + 3*padding,
-                height: button.bounds.height)
-            marqueeText.menubarBounds = button.bounds
+        if !togglePlayPause {
+            if text.isEmpty || upperLimit == 0 {
+                // Set dimensions of menu bar extra to only animation
+                let width = barAnimation.bounds.width + 2*padding
+                let height = button.bounds.height
+                if button.frame.width != width || button.frame.height != height {
+                    button.frame = NSRect(x: 0, y: 0, width: width, height: height)
+                }
+                perform(#selector(stopIgnoringForceNotifs), with: nil, afterDelay: 0.05)
+                return
+            } else {
+                // Set dimensions of menu bar extra to animation + text
+                let width = min(stringWidth, upperLimit) + animWidth + 3*padding
+                let height = button.bounds.height
+                
+                if button.frame.width != width || button.frame.height != height {
+                    button.frame = NSRect(x: 0, y: 0, width: width, height: height)
+                }
+                marqueeText.menubarBounds = button.bounds
+            }
         }
         
         ignoreForceHiddenNotifs = true
@@ -280,10 +300,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Decrement all the way to 0 if dynamic resizing is off
         let decrement = dynamicResizing ? statusBarItemResizeDecrement : upperLimit
         
-        perform(#selector(downsizeStatusBarItemTitle), with: [button, upperLimit, decrement] as [Any], afterDelay: 0.02)
+        perform(#selector(downsizeStatusBarItemTitleIfNeeded), with: [button, min(stringWidth, upperLimit), decrement] as [Any], afterDelay: 0.1)
     }
     
-    @objc func downsizeStatusBarItemTitle(_ arg: NSArray) {
+    @objc func downsizeStatusBarItemTitleIfNeeded(_ arg: NSArray) {
         let button: NSStatusBarButton = arg[0] as! NSStatusBarButton
         
         let lowerLimit = Constants.StatusBar.marqueeMinimumWidth
@@ -292,15 +312,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let decrement: CGFloat = arg[2] as! CGFloat
         let forceHidden = button.window?.occlusionState.contains(.visible) == false
         
-        var newValue: CGFloat = upperLimit - decrement
+        var newValue: CGFloat = upperLimit - upperLimit.truncatingRemainder(dividingBy: 48) - decrement
         if newValue < lowerLimit {
             newValue = 0
         }
         
-//        print("Trying to resize because hidden", forceHidden, "new limit:", newValue)
-        
         if forceHidden {
-            updateStatusBarItemTitle(upperLimitForced: newValue)
+            updateStatusBarItem(forceHiddenRestrictedWidth: newValue)
         } else {
             stopIgnoringForceNotifs()
         }
