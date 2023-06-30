@@ -173,7 +173,7 @@ struct PreferencesView: View {
                     Slider(value: $statusBarButtonLimit,
                            in: 30...500,
                            onEditingChanged: { editing in
-                        AppDelegate.instance.updateStatusBarItemTitle()
+                        AppDelegate.instance.updateStatusBarItem()
                     }
                     )
                     Text(statusBarButtonLimit == 500 ? "Infinite" : String(format: "%.0f px", statusBarButtonLimit))
@@ -181,10 +181,10 @@ struct PreferencesView: View {
                 HStack() {
                     Text("Show")
                     Toggle("Title", isOn: $showTitle).onChange(of: showTitle) { _ in
-                        AppDelegate.instance.updateStatusBarItemTitle()
+                        AppDelegate.instance.updateStatusBarItem()
                     }
                     Toggle("Artist", isOn: $showArtist).onChange(of: showArtist) { _ in
-                        AppDelegate.instance.updateStatusBarItemTitle()
+                        AppDelegate.instance.updateStatusBarItem()
                     }
                 }
                 HStack() {
@@ -200,10 +200,10 @@ struct PreferencesView: View {
                     }
                 }
                 Toggle("Ignore Parentheses", isOn: $ignoreParentheses).onChange(of: ignoreParentheses) { _ in
-                    AppDelegate.instance.updateStatusBarItemTitle()
+                    AppDelegate.instance.updateStatusBarItem()
                 }
                 Toggle("Dynamic Resizing (Experimental)", isOn: $dynamicResizing).onChange(of: dynamicResizing) { _ in
-                    AppDelegate.instance.updateStatusBarItemTitle()
+                    AppDelegate.instance.updateStatusBarItem()
                 }
                 
             }
