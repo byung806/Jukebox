@@ -327,51 +327,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func stopIgnoringForceNotifs() {
         ignoreForceHiddenNotifs = false
     }
-        
-//        // Check if width fits in menu bar, decrease until it does
-//        let lowerLimit = Constants.StatusBar.marqueeWidthBeforeHidden
-//        let increment: CGFloat = 10
-//
-//        var forceHidden = true
-//        var doneResizing = false
-//
-//        while forceHidden && upperLimit >= lowerLimit {
-//
-////            print("Attempting: ")
-////            print(upperLimit)
-//
-//            // Set dimensions of menu bar extra to animation + text
-//            button.frame = NSRect(
-//                x: 0,
-//                y: 0,
-//                width: min(stringWidth, upperLimit) + animWidth + 3*padding,
-//                height: button.bounds.height)
-//            marqueeText.menubarBounds = button.bounds
-//
-//            button.window?.update()
-//
-//            // Check if force hidden
-//            forceHidden = button.window?.occlusionState.contains(.visible) == false
-////            print(!forceHidden)
-//            if !forceHidden { doneResizing = true; break }
-//
-//            upperLimit -= increment
-//
-//        }
-//
-//        if !doneResizing {
-////            print("showing only animation")
-//            updateStatusBarItemTitle(onlyAnimation: true)
-//        }
-////
-////        print("visible: ")
-////        print(self.statusBarItem.button!.window?.occlusionState.contains(.visible) == true)
-////        print(doneResizing ? upperLimit : 0)
-//
-//
-//        ignoreNextForceHiddenFalseNotif = true
-
-//    }
     
     // Called when the status bar appearance is changed to update bar animation color and marquee text color
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
