@@ -29,6 +29,10 @@ struct PreferencesView: View {
         Text(connectedApp.localizedName)
     }
     
+    private func updateStatusBarItem(updateIcon: Bool = false, updateTitle: Bool = false) {
+        AppDelegate.instance.updateStatusBarItem(updateIcon: updateIcon, updateTitle: updateTitle)
+    }
+    
     init(parentWindow: PreferencesWindow) {
         self.parentWindow = parentWindow
     }
@@ -173,7 +177,7 @@ struct PreferencesView: View {
                     Slider(value: $statusBarButtonLimit,
                            in: 30...500,
                            onEditingChanged: { editing in
-                        AppDelegate.instance.updateStatusBarItem()
+                        updateStatusBarItem()
                     }
                     )
                     Text(statusBarButtonLimit == 500 ? "Infinite" : String(format: "%.0f px", statusBarButtonLimit))
@@ -181,10 +185,10 @@ struct PreferencesView: View {
                 HStack() {
                     Text("Show")
                     Toggle("Title", isOn: $showTitle).onChange(of: showTitle) { _ in
-                        AppDelegate.instance.updateStatusBarItem()
+                        updateStatusBarItem(updateTitle: true)
                     }
                     Toggle("Artist", isOn: $showArtist).onChange(of: showArtist) { _ in
-                        AppDelegate.instance.updateStatusBarItem()
+                        updateStatusBarItem(updateTitle: true)
                     }
                 }
                 HStack() {
@@ -200,10 +204,10 @@ struct PreferencesView: View {
                     }
                 }
                 Toggle("Ignore Parentheses", isOn: $ignoreParentheses).onChange(of: ignoreParentheses) { _ in
-                    AppDelegate.instance.updateStatusBarItem()
+                    updateStatusBarItem(updateTitle: true)
                 }
                 Toggle("Dynamic Resizing (Experimental)", isOn: $dynamicResizing).onChange(of: dynamicResizing) { _ in
-                    AppDelegate.instance.updateStatusBarItem()
+                    updateStatusBarItem(updateTitle: true)
                 }
                 
             }

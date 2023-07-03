@@ -27,6 +27,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     // For dynamic status bar item sizing
     private var ignoreForceHiddenNotifs: Bool = false  // set to true when trying different sizes of status bar items
+    private var currentStringWidth: CGFloat = 0
+    private var currentForceHiddenRestrictedWidth: CGFloat = Constants.Number.infinity
     private let statusBarItemResizeDecrement: CGFloat = 48  // how much Jukebox will try to decrease the size of the status bar item to make it fit
     
     private var currentTrackTitle: String = ""
@@ -57,8 +59,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             object: nil)
         
         NotificationCenter.default.addObserver(forName: NSWindow.didChangeOcclusionStateNotification, object: statusBarItem.button!.window, queue: nil) { _ in
-            
-            // Return if ignoring notif
+//            print("notif")
+//
+//            // Return if ignoring notif
+//            print(self.ignoreForceHiddenNotifs ? "ignored" : "")
             guard !self.ignoreForceHiddenNotifs else { return }
             // Return if manually set to invisible
             guard self.statusBarItem.isVisible else { return }
@@ -69,9 +73,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self.updateStatusBarItem()
             
         }
-        
-        self.updateStatusBarItem()
-        
+                
     }
     
     func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -221,34 +223,93 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         currentTrackArtist = trackArtist
         currentIsPlaying = isPlaying
                 
-        updateStatusBarItem()
+        updateStatusBarItem(updateIcon: true, updateTitle: true)
         
     }
     
-    // Updates the title of the status bar(displays pause icon if track is not playing)
-    @objc func updateStatusBarItem(forceHiddenRestrictedWidth: CGFloat = Constants.Number.infinity) {
-                
+    @objc func updateStatusBarItemIcon() {
+
         // Get status item button (whole status bar item)
         guard let button = statusBarItem.button else { return }
-        
-        let widthPreferenceInfinite = statusBarButtonLimit == Constants.StatusBar.marqueeInfiniteWidth
-        // Absolute limit for width of status bar item. Uses min() because Jukebox tries to restrict width when item is force hidden
-        let upperLimit = min(widthPreferenceInfinite ? Constants.Number.infinity : floor(statusBarButtonLimit),
-                             forceHiddenRestrictedWidth)
-        
-        
+
         // Get animation/icon part of status bar item
         guard let barAnimation = button.subviews[0] as? StatusBarAnimation else { return }
+        // Get text part of status bar item
+        guard let marqueeText = button.subviews[1] as? MenuMarqueeText else { return }
+
         // Update bar animation
         let togglePlayPause = barAnimation.isPlaying != currentIsPlaying
         if togglePlayPause { barAnimation.isPlaying = currentIsPlaying }
+
+        // Update text
+        if marqueeText.text != "" { marqueeText.text = "" }
+
+        // Set dimensions of menu bar extra to only animation
+        let width = barAnimation.bounds.width + 2*Constants.StatusBar.statusBarButtonPadding
+        let height = button.bounds.height
+
+        if button.frame.width != width || button.frame.height != height {
+            button.frame = NSRect(x: 0, y: 0, width: width, height: height)
+        }
+
+        perform(#selector(stopIgnoringForceNotifs), with: nil, afterDelay: 0.5)
+
+    }
+    
+    // Updates the status bar item, handles icon changes, text changes, resizing
+    @objc func updateStatusBarItem(showOnlyIcon: Bool = false, updateIcon: Bool = false, updateTitle: Bool = false, forceHiddenRestrictedWidth: CGFloat = Constants.Number.infinity) {
         
-        
-        // Get text part of status bar item
+        // Get status item button (whole status bar item)
+        guard let button = statusBarItem.button else { return }
         guard let marqueeText = button.subviews[1] as? MenuMarqueeText else { return }
         
-        // Calculate updated display text
+        // if paused or unpaused, not triggered when resized
+        if updateIcon {
+            // Get animation/icon part of status bar item
+            guard let barAnimation = button.subviews[0] as? StatusBarAnimation else { return }
+            
+            if barAnimation.isPlaying != currentIsPlaying { barAnimation.isPlaying = currentIsPlaying }
+        }
+        
+        // only if text changed, not triggered when resized
+        if updateTitle || showOnlyIcon {
+            // Calculate updated display text
+            let text = calculateUpdatedDisplayText(showOnlyIcon: showOnlyIcon)
+            
+            // Set Marquee text with new track data (or different data on user preference change)
+            if marqueeText.text != text { marqueeText.text = text }
+            
+            currentStringWidth = text.stringWidth(with: Constants.StatusBar.marqueeFont)
+        }
+        
+        let width = calculateStatusBarItemWidth(showOnlyIcon: showOnlyIcon, stringWidth: currentStringWidth, forceHiddenRestrictedWidth: forceHiddenRestrictedWidth)
+        let height = button.bounds.height
+        
+        print("trying with:", width, height)
+        
+//        if width >= currentForceHiddenRestrictedWidth {
+//            return
+//        }
+        
+        button.frame = NSRect(x: 0, y: 0, width: width, height: height)
+        marqueeText.menubarBounds = button.bounds
+        
+        
+        // Decrement all the way to 0 if dynamic resizing is off
+        ignoreForceHiddenNotifs = true
+                        
+        let decrement = dynamicResizing ? statusBarItemResizeDecrement : width
+        
+        perform(#selector(downsizeStatusBarItemTitleIfNeeded), with: [button, width, decrement] as [Any], afterDelay: 0.5)
+        
+        currentForceHiddenRestrictedWidth = forceHiddenRestrictedWidth
+        
+    }
+    
+    @objc func calculateUpdatedDisplayText(showOnlyIcon: Bool = false) -> String {
         var text = ""
+        
+        if showOnlyIcon { return text }
         // Only update text if text is showing
         if (showTitle) {
             text += ignoreParentheses ? currentTrackTitle.getWithoutParentheses() : currentTrackTitle
@@ -257,50 +318,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if !text.isEmpty { text += " • " }
             text += ignoreParentheses ? currentTrackArtist.getWithoutParentheses() : currentTrackArtist
         }
-        
-        
-        // Calculate string width
-        let font = Constants.StatusBar.marqueeFont
-        let stringWidth = text.stringWidth(with: font)
-        
-        // Set Marquee text with new track data
-        if marqueeText.text != text {
-            // New text (either new song or text updating from a preference change)
-            marqueeText.text = text
-//            closePopover(button)
-        }
-        
+        return text
+    }
+    
+    @objc func calculateStatusBarItemWidth(showOnlyIcon: Bool = false, stringWidth: CGFloat = 0, forceHiddenRestrictedWidth: CGFloat = Constants.Number.infinity) -> CGFloat {
         let animWidth = Constants.StatusBar.barAnimationWidth
         let padding = Constants.StatusBar.statusBarButtonPadding
         
-        if !togglePlayPause {
-            if text.isEmpty || upperLimit == 0 {
-                // Set dimensions of menu bar extra to only animation
-                let width = barAnimation.bounds.width + 2*padding
-                let height = button.bounds.height
-                if button.frame.width != width || button.frame.height != height {
-                    button.frame = NSRect(x: 0, y: 0, width: width, height: height)
-                }
-                perform(#selector(stopIgnoringForceNotifs), with: nil, afterDelay: 0.05)
-                return
-            } else {
-                // Set dimensions of menu bar extra to animation + text
-                let width = min(stringWidth, upperLimit) + animWidth + 3*padding
-                let height = button.bounds.height
-                
-                if button.frame.width != width || button.frame.height != height {
-                    button.frame = NSRect(x: 0, y: 0, width: width, height: height)
-                }
-                marqueeText.menubarBounds = button.bounds
-            }
+        if showOnlyIcon {
+            return animWidth + 2*padding
+        } else {
+            return min(animWidth + stringWidth + 3*padding,
+                       statusBarButtonLimit == Constants.StatusBar.marqueeInfiniteWidth ? Constants.Number.infinity : floor(statusBarButtonLimit),
+                       forceHiddenRestrictedWidth)
         }
-        
-        ignoreForceHiddenNotifs = true
-        
-        // Decrement all the way to 0 if dynamic resizing is off
-        let decrement = dynamicResizing ? statusBarItemResizeDecrement : upperLimit
-        
-        perform(#selector(downsizeStatusBarItemTitleIfNeeded), with: [button, min(stringWidth, upperLimit), decrement] as [Any], afterDelay: 0.1)
     }
     
     @objc func downsizeStatusBarItemTitleIfNeeded(_ arg: NSArray) {
@@ -311,14 +342,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         
         let decrement: CGFloat = arg[2] as! CGFloat
         let forceHidden = button.window?.occlusionState.contains(.visible) == false
-        
-        var newValue: CGFloat = upperLimit - upperLimit.truncatingRemainder(dividingBy: 48) - decrement
-        if newValue < lowerLimit {
-            newValue = 0
+                
+        var newValue: CGFloat = upperLimit - upperLimit.truncatingRemainder(dividingBy: statusBarItemResizeDecrement)
+        if newValue == upperLimit {
+            newValue -= decrement
         }
         
+        let showOnlyIcon = newValue < lowerLimit
+        
         if forceHidden {
-            updateStatusBarItem(forceHiddenRestrictedWidth: newValue)
+            updateStatusBarItem(showOnlyIcon: showOnlyIcon, forceHiddenRestrictedWidth: newValue)
         } else {
             stopIgnoringForceNotifs()
         }
